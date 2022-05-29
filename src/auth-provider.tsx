@@ -170,9 +170,11 @@ export function AuthProvider(props: AuthProviderProps) {
 
   const getAccessTokenSilently = useCallback(async () => {
     if (accessToken) {
-      const { iat, exp } = jwtDecode<any>(accessToken);
-
-      if (new Date((iat + exp) * 1000) > new Date()) {
+      const { exp } = jwtDecode<any>(accessToken);
+      
+      const buffer = 60000 * 2;
+      
+      if ((new Date().getTime() - buffer) > new Date(exp * 1000).getTime()) {
         return accessToken;
       }
     }
@@ -199,7 +201,7 @@ export function AuthProvider(props: AuthProviderProps) {
       // TODO: log error remove token
     });
 
-    setAuthState(initialAuthState);
+    setAuthState({...initialAuthState, isLoading: false});
   }, [domain, clientId, _redirectUri]);
 
   useEffect(() => {
